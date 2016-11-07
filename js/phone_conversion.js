@@ -25,45 +25,84 @@ var phoneConversion = {
   getDigits: function() {
     let rawPhone = $('#phone').val();
     this.phone = rawPhone.match(/\d/g).join('');
+
+    this.countryCode = this.hasCountryCode();
+  },
+
+  /* ***
+   * Determine if phone number includes a US country code.
+   */
+  hasCountryCode: function() {
+    if (this.phone.length === 11 && this.phone.substr(0, 1) == '1') {
+      // Truncate the country code.
+      this.phone = this.phone.substr(1, 10);
+
+      // Save country code.
+      return '1';
+    }
+
+    return false;
   },
 
   /* ***
    * Determine if the phone number is a real phone number. If not, display errors.
    */
   isReal: function() {
-    if (this.phone.length != 10) {
-      this.display('<pre>' + this.phone + '</pre>');
-      return false;
-    }
+    // US phone numbers are 10 digits long.
+    if (this.phone.length === 10) { return true; }
 
-    return true;
+    // Otherwise, this is not a valid phone number.
+    this.display('<pre>' + this.phone + '</pre>');
+    return false;
+
   },
 
   /* ***
    * Assemble the formatted phone number
    */
   displayFormatted: function() {
+    let href = this.getHref();
     let display = this.getDisplay();
     let label = this.getLabel();
-    this.display('<pre>&lt;a href="tel:' + this.phone + '" aria-label="' + label + '"&gt;' + display + '&lt;/a&gt;</pre>');
+    this.display('<pre>&lt;a href="tel:' + href + '" aria-label="' + label + '"&gt;' + display + '&lt;/a&gt;</pre>');
+  },
+
+  /* ***
+   * Assemble the phone number used in the tel: href
+   */
+  getHref: function() {
+    return '1-' + this.phone.substr(0, 3) + '-' + this.phone.substr(3, 3) + '-' + this.phone.substr(6, 4);
   },
 
   /* ***
    * Assemble the phone number that is displayed to the user
    */
   getDisplay: function() {
-    return '(' + this.phone.substr(0, 3) + ') ' + this.phone.substr(3, 3) + '-' + this.phone.substr(6, 4);
+    let display = '';
+
+    if (this.countryCode) {
+      display += '1 ';
+    }
+
+    display += '(' + this.phone.substr(0, 3) + ') ' + this.phone.substr(3, 3) + '-' + this.phone.substr(6, 4);
+    return display;
   },
 
   /* ***
    * Assemble the phone number used for the ARIA label
    */
   getLabel: function() {
-    let areaCode = this.phone.substr(0, 3).match(/\d/g).join(' ');
-    let exchange = this.phone.substr(3, 3).match(/\d/g).join(' ');
-    let number   = this.phone.substr(6, 4).match(/\d/g).join(' ');
+    let label = '';
 
-    return areaCode + '. ' + exchange + '. ' + number;
+    if (this.countryCode) {
+      label += '1. ';
+    }
+
+    label += this.phone.substr(0, 3).match(/\d/g).join(' ') + '. ';  // Area code
+    label += this.phone.substr(3, 3).match(/\d/g).join(' ') + '. ';  // Exchange
+    label += this.phone.substr(6, 4).match(/\d/g).join(' ');  // Rest of the number
+
+    return label;
   },
 
   /* ***
