@@ -15,7 +15,7 @@ body {
 header {
   background: #3a3335;
   color: #fff;
-  padding: 1rem;
+  padding: 1.5rem 1rem;
 }
 
 h1 {
@@ -33,16 +33,14 @@ p {
   line-height: 1.4;
 }
 
-pre {
-  font-family: monospace;
-  font-size: 1.4rem;
-  line-height: 1.6;
+section {
+  margin: 1rem;
 }
 
 /* Form styles */
 
 form {
-  margin: 2rem 1rem;
+  margin: 3rem 1rem;
 }
 
 input {
@@ -73,9 +71,29 @@ input[type=submit]:hover {
 
 /* Results section */
 
+.tabs {
+  list-style-type: none;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+.tabs li {
+  background: #EDE6E8;
+  color: #666;
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+}
+
+.tabs li.active {
+  background: #f0544f;
+  color: #fff;
+}
+
 #phone-result {
-  background: #c6d8d3;
-  margin: 0.25rem 1rem 2rem;
-  overflow: auto;
+  border: solid #3a3335;
+  border-width: 4px 1px 1px;
+  font-family: monospace;
+  font-size: 1.4rem;
   padding: 2rem;
+  width: 90%;
 }

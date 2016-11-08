@@ -9,14 +9,25 @@ var phoneConversion = {
   convert: function(e) {
     e.preventDefault();
 
+    // Reset object variables.
+    this.country = 'error';
+    this.hasUsCode = null;
+
     // Convert inputted phone number to just digits.
     this.getDigits();
-
-    // If the inputted number is not a phone number, do nothing else.
-    if (!this.isReal()) { return false; }
+    this.checkValidity();
 
     // We have a real phone number! Display the formatted version.
-    this.displayFormatted();
+    switch (this.country) {
+      case 'us':
+        this.displayFormattedUs();
+        break;
+      case 'qatar':
+        this.displayFormattedQatar();
+        break;
+      default:
+        this.displayError();
+    }
   },
 
   /* ***
@@ -25,91 +36,92 @@ var phoneConversion = {
   getDigits: function() {
     let rawPhone = $('#phone').val();
     this.phone = rawPhone.match(/\d/g).join('');
-
-    this.countryCode = this.hasCountryCode();
-  },
-
-  /* ***
-   * Determine if phone number includes a US country code.
-   */
-  hasCountryCode: function() {
-    if (this.phone.length === 11 && this.phone.substr(0, 1) == '1') {
-      // Truncate the country code.
-      this.phone = this.phone.substr(1, 10);
-
-      // Save country code.
-      return '1';
-    }
-
-    return false;
   },
 
   /* ***
    * Determine if the phone number is a real phone number. If not, display errors.
    */
-  isReal: function() {
-    // US phone numbers are 10 digits long.
-    if (this.phone.length === 10) { return true; }
+  checkValidity: function() {
+    // US phone without country code.
+    if (this.phone.length === 10) {
+      this.country = 'us';
+      return true;
+    }
+
+    // US phone with country code.
+    if (this.phone.length === 11 && this.phone.substr(0,1) == '1') {
+      this.country = 'us';
+      this.hasUsCode = true;
+      this.phone = this.phone.substr(1, 10);
+      return true;
+    }
+
+    // Qatar phone
+    if (this.phone.length === 11 && this.phone.substr(0, 3) == '974') {
+      this.country = 'qatar';
+      return true;
+    }
 
     // Otherwise, this is not a valid phone number.
-    this.display('<pre>' + this.phone + '</pre>');
     return false;
-
   },
 
   /* ***
-   * Assemble the formatted phone number
+   * Assemble the formatted phone number for US phone numbers.
    */
-  displayFormatted: function() {
-    let href = this.getHref();
-    let display = this.getDisplay();
-    let label = this.getLabel();
-    this.display('<pre>&lt;a href="tel:' + href + '" aria-label="' + label + '"&gt;' + display + '&lt;/a&gt;</pre>');
-  },
+  displayFormattedUs: function() {
+    let href = '1-' + this.phone.substr(0, 3) + '-' + this.phone.substr(3, 3) + '-' + this.phone.substr(6, 4);
 
-  /* ***
-   * Assemble the phone number used in the tel: href
-   */
-  getHref: function() {
-    return '1-' + this.phone.substr(0, 3) + '-' + this.phone.substr(3, 3) + '-' + this.phone.substr(6, 4);
-  },
-
-  /* ***
-   * Assemble the phone number that is displayed to the user
-   */
-  getDisplay: function() {
     let display = '';
-
-    if (this.countryCode) {
-      display += '1 ';
-    }
-
+    if (this.hasUsCode) { display += '+1 '; }
     display += '(' + this.phone.substr(0, 3) + ') ' + this.phone.substr(3, 3) + '-' + this.phone.substr(6, 4);
-    return display;
-  },
 
-  /* ***
-   * Assemble the phone number used for the ARIA label
-   */
-  getLabel: function() {
     let label = '';
-
-    if (this.countryCode) {
-      label += '1. ';
-    }
-
+    if (this.hasUsCode) { label += '1. '; }
     label += this.phone.substr(0, 3).match(/\d/g).join(' ') + '. ';  // Area code
     label += this.phone.substr(3, 3).match(/\d/g).join(' ') + '. ';  // Exchange
     label += this.phone.substr(6, 4).match(/\d/g).join(' ');  // Rest of the number
 
-    return label;
+    this.display('<a href="tel:' + href + '" aria-label="' + label + '">' + display + '</a>');
+  },
+
+  /* ***
+   * Assemble the formatted phone number for Qatar phone numbers.
+   */
+  displayFormattedQatar: function() {
+    let href = '+' + this.phone;
+
+    let display = '+' + this.phone.substr(0, 3) + ' ' + this.phone.substr(3, 3) + ' ' + this.phone.substr(6, 5);
+
+    let label = '';
+    label += this.phone.substr(0, 3).match(/\d/g).join(' ') + '. ';  // Area code
+    label += this.phone.substr(3, 3).match(/\d/g).join(' ') + '. ';  // Exchange
+    label += this.phone.substr(6, 5).match(/\d/g).join(' ');  // Rest of the number
+
+    this.display('<a href="tel:' + href + '" aria-label="' + label + '">' + display + '</a>');
+  },
+
+  /* ***
+   * Display error version of phone number.
+   */
+  displayError: function() {
+    this.display('Not a valid phone number. :-(', false);
   },
 
   /* ***
    * Utility function to display things in the results section.
    */
-  display: function(html) {
-    $('#phone-result').html(html);
+  display: function(html, select=true) {
+    // Update tab display.
+    $('.tabs li').removeClass('active');
+    $('#' + this.country).addClass('active');
+
+    // Display the formatted phone number.
+    $('#phone-result').val(html);
+
+    if (select) {
+      $('#phone-result').select();
+    }
   }
 };
 
