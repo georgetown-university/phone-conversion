@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title>Phone Number Conversion</title>
+  <link rel="stylesheet" href="css/phone_conversion.css">
+</head>
+
+<body>
+  <header>
+    <h1>Phone Number Conversion</h1>
+    <p>This page takes a (poorly?) formatted phone number and converts it to an accessible phone number with <i>tel:</i> link.  This conversion is for phone numbers for the US, Canada, and Qatar only. (Apologies to the rest of Earth.)</p>
+  </header>
+
+  <form id="phone-conversion">
+    <input type="text" name="phone" id="phone" placeholder="Paste phone number here" autofocus>
+    <input type="submit" value="Convert!">
+  </form>
+
+  <h2>Results:</h2>
+  <section>
+    <ul class="tabs">
+      <li id="us">US/Canada</li>
+      <li id="qatar">Qatar</li>
+      <li id="error">Error</li>
+    </ul>
+
+    <input id="phone-result">
+  </section>
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="js/phone_conversion.js"></script>
+</body>
+
+</html>
